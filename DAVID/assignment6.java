@@ -88,6 +88,8 @@ public class assignment6 {
         int option;
         double price = askprice();
         do {
+            // The available seats are shown
+            seatsAvailability();
             // The number of available seats is shown
             System.out.println("\n Currently there are " + availableSeats + " available seats.");
             // Show the main menu
@@ -348,29 +350,52 @@ public class assignment6 {
         System.out.println(changedTickets + " seats wil be changed.");
         return changedTickets;
     }
+
     //Last but not least, a method that change seat for N tickets:
     public static void changeTickets(int changedTickets) {
         for (int i = 0; i < changedTickets; i++) {
             System.out.println("Ticket number " + (i + 1));
             int row, column;
             boolean seatselected = false;
+            boolean changeCompleted = false;
+            seatsAvailability();
+            // Change the ticket
             do {
+
                 // Ask for the row of the seat
-                row = verifyrange(1, ROWS, "Enter the row number of the seat you want to buy: ");
-                System.out.println("The row number of the seat is: " + row);
+                row = verifyrange(1, ROWS, "Enter the row number of the seat you want to change: ");
+   
 
                 // Ask for the column of the seat
-                System.out.println("Ticket number " + (i + 1));
-                column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to buy: ");
-                System.out.println("The column number of the seat is: " + column);
+                
+                column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to change: ");
+               
+                
                 if (seats[row - 1][column - 1] == OCCUPIED) {
-                    System.out.println("ERROR. The seat is already occupied.");
-
-                } else {
-                    // Mark the seat as occupied
-                    seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
-                    availableSeats--;
+                    System.out.println("Correct position, you selected, to change, the seat:" + " row: "+ row + " column: " + column);
+                    // Mark the seat as available
+                    seats[row - 1][column - 1] = 'A'; // We put 'A' to indicate is Available
+                    availableSeats++;
                     seatselected = true;
+                   
+                    //Select a new empty seat
+                    do {
+                    row = verifyrange(1, ROWS, "Enter the row number of the new seat: ");
+                    column = verifyrange(1, COLUMNS, "Enter the column number of the new seat: ");
+                    if (seats[row - 1][column - 1] == AVAILABLE) {
+                        System.out.println("Correct position, your new seat is: " + " row: "+ row + " column: " + column);
+                        // Mark the seat as occupied
+                        seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
+                        availableSeats--;
+                        changeCompleted = true;
+                    } else {
+                        System.out.println("ERROR. The seat is already occupied,try with another seat.");
+                    }
+                } while (changeCompleted == false);
+                }
+                 else {
+                    // The seat was not occupied, so it cannot be changed.
+                    System.out.println("ERROR. The seat is already available.");
                 }
             }
 
