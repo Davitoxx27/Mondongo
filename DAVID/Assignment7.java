@@ -4,7 +4,7 @@
 //ERNESTO CALDERON 
 import java.util.Scanner;
 
-public class assignment6 {
+public class Assignment7 {
     private static final Scanner KEYBOARD = new Scanner(System.in);
     static final int ROWS = 5;
     static final int COLUMNS = 4;
@@ -17,7 +17,9 @@ public class assignment6 {
 	static final double DISCOUNT_MAXTICKETS = 10; // or multiply by 0,9
 	static final int MAX_TICKETS_NUMBER = 12;
     static int minorTickets;
-
+    private static int totalTickets;
+    private static boolean purchaseCompleted , seatsAssigned;
+    private static double price;
     public static void main(String[] args) {
         menu();
         KEYBOARD.close();
@@ -86,10 +88,142 @@ public class assignment6 {
         return (number);
 
     }
+     //Method that selects the seats
+    //  public static selectSeats(){
 
+
+
+    //  }
+    //Method to select seats manually
+    public static void selectSeatsManually(){
+        for (int i = 0; i < totalTickets; i++) {
+            System.out.println("Ticket number " + (i + 1));
+            int row, column;
+            boolean seatselected = false;
+            do {
+                // Ask for the row of the seat
+                row = verifyrange(1, ROWS, "Enter the row number of the seat you want to buy: ");
+                System.out.println("The row number of the seat is: " + row);
+                // Ask for the column of the seat
+                System.out.println("Ticket number " + (i + 1));
+                column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to buy: ");
+                System.out.println("The column number of the seat is: " + column);
+                if (seats[row - 1][column - 1] == OCCUPIED) {
+                    System.out.println("ERROR. The seat is already occupied.");
+                } else {
+                    // Mark the seat as occupied
+                    seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
+                    availableSeats--;
+                    seatselected = true;
+                }
+            } while (seatselected == false);
+        }
+
+
+    }
+    //Method to select seats automatically
+public static void selectSeatsAutomatically(){
+    int selectedSeats = 0;
+                            boolean completedSeatSelection = false;
+                            System.out.println("Seats will be selected automatically:");
+                            // Traverse through rows of the seats matrix in search of available seats
+                            // Traversal ends when the seat selection is complete, i.e. when as many seats have been selected as there are tickets to be purchased by the user.
+                            for(int i = 0; i < ROWS && !completedSeatSelection; i++){
+                                for(int j = 0; j < COLUMNS && !completedSeatSelection; j++){
+                                    if(seats[i][j] == AVAILABLE){
+                                        seats[i][j] = OCCUPIED;
+                                        System.out.println("The seat in row " + (i+1) + " and column " + (j+1) + " has been selected.");
+                                        // The selected and available seat counts are updated.
+                                        selectedSeats++;
+                                        availableSeats--;
+                                        
+                                        if(selectedSeats == tickets){
+                                            completedSeatSelection = true;
+                                        }
+                                    }
+                                }
+                            }
+
+
+
+}
+// A method that selects adjacent seats
+public static void searchContiguousSeats(){
+
+
+    boolean adjacentSeats = false;
+    // To find contiguous seats, the array must be traversed. Once found, no further traversal is necessary. 
+    // Since this is a traversal that may end before the end of the matrix traversal (indeterminate number of iterations), 
+    // the matrix is traversed by nesting two while loops.
+    int i = 0;
+    // The while condition causes the rows of the matrix to be traversed as long as contiguous entries have not been found.
+    while (i < ROWS && !adjacentSeats) {
+        int adjacent = 0; // adjacent seats counter
+        int j = 0;
+        while (j < COLUMNS && !adjacentSeats) {
+            if (seats[i][j] == AVAILABLE) {
+                adjacent++;
+            } else {
+                adjacent = 0; // Restart the count when an occupied seat is found
+            }
+            // If, after traversing the matrix, N contiguous seats have been found....
+            if (adjacent == tickets) {
+                // Adjacent seats found are marked  as occupied.
+                for (int k = j - adjacent + 1; k <= j; k++) {
+                    seats[i][k] = OCCUPIED;
+                    // Update available seats
+                    availableSeats--;
+                    System.out.println("The seat in row " + (i+1) + " and column " + (k+1) + " has been selected.");
+                }
+                adjacentSeats = true;
+                purchaseCompleted = true;
+                seatsAssigned = true;
+            }
+            j++;
+        }
+        i++;
+    }
+    if(!adjacentSeats){
+        System.out.println("There are not enough adjacent seats available. Choose another type of seat selection");
+        purchaseCompleted = false;
+    }
+    }
+    //A method that shows the invoice
+    public static void showInvoice(){
+                         // Generation of the invoice for the purchase of tickets if the seats were assigned
+                         if(seatsAssigned==true){ 
+                            double totalPrice = price * tickets;
+                            int ticketsAdults = tickets - minorTickets;
+                            double totalPriceMinors, totalPriceAdults;
+                            if (minorTickets> 0) {
+                                totalPriceMinors = price * (1 - DISCOUNT_MINORS/100)  * minorTickets;//divided into 100 to convert it into a percentange, and substract 1 to apply the discount(it is equal to multiply by 0,8)
+                                totalPriceAdults = price * ticketsAdults;
+                                totalPrice = totalPriceAdults + totalPriceMinors;
+                            }
+                            else {
+                                totalPrice = price * tickets;
+                            }
+                            if (tickets > MAX_TICKETS_NUMBER) {
+                                totalPrice = totalPrice * (1 - DISCOUNT_MAXTICKETS/100);//(equivalent to multiply by 0,9)
+                            }
+                            System.out.println("Invoice:");
+                            System.out.println("  Number of tickets: " + tickets);
+                            System.out.println("  Price per ticket: " + price);
+                            System.out.println("  Discount applied for purchase in bulk: " + (tickets > MAX_TICKETS_NUMBER ? DISCOUNT_MAXTICKETS + "%": "None"));
+                            System.out.println("  Discount applied for tickets for minors: " + (minorTickets > 0 ? DISCOUNT_MINORS + "%" : "None"));
+                            System.out.printf("  Total price: %.2f", totalPrice);
+                            System.out.println();
+                        }
+                else{
+                    System.out.println("Sorry, there are not enough seats available. Purchase could not be finished.");
+                }
+
+
+    }
+        
     public static void menu() {
         int option;
-        double price = askprice();
+        price = askprice();
         do {
             // The available seats are shown
             seatsAvailability();
@@ -114,7 +248,7 @@ public class assignment6 {
                     System.out.println("Purchasing tickets chosen");
                     // Ask for the number of tickets to buy
 
-                    int totalTickets = verifyrange(1, availableSeats, "There are: " + availableSeats + " seats available ,enter the number of tickets you want to buy: "  );
+                    totalTickets = verifyrange(1, availableSeats, "There are: " + availableSeats + " seats available ,enter the number of tickets you want to buy: "  );
                     tickets = totalTickets;
                     System.out.println("The total tickets bought are: " + totalTickets);
                     boolean adultTickets = false;
@@ -131,9 +265,9 @@ public class assignment6 {
                     } while (adultTickets == false);
                     int purchaseOption;
                                             // Purchase options menu is displayed as long as the purchase has not been successfully completed.
-                                            boolean purchaseCompleted = true;
+                                            purchaseCompleted = true;
                                             // check that the seats have been assigned and thus avoid indicating the number of tickets and to exit the purchase option menu without having selected the seats
-                                            boolean seatsAssigned = false;
+                                            seatsAssigned = false;
                     do{
                         System.out.println("Choose a ticket purchase option:");
                         System.out.println("1. Manual seat selection.");
@@ -146,93 +280,18 @@ public class assignment6 {
                         switch (purchaseOption) {
                             //Manual seat selection
                             case 1:
-                                for (int i = 0; i < totalTickets; i++) {
-                                    System.out.println("Ticket number " + (i + 1));
-                                    int row, column;
-                                    boolean seatselected = false;
-                                    do {
-                                        // Ask for the row of the seat
-                                        row = verifyrange(1, ROWS, "Enter the row number of the seat you want to buy: ");
-                                        System.out.println("The row number of the seat is: " + row);
-                                        // Ask for the column of the seat
-                                        System.out.println("Ticket number " + (i + 1));
-                                        column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to buy: ");
-                                        System.out.println("The column number of the seat is: " + column);
-                                        if (seats[row - 1][column - 1] == OCCUPIED) {
-                                            System.out.println("ERROR. The seat is already occupied.");
-                                        } else {
-                                            // Mark the seat as occupied
-                                            seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
-                                            availableSeats--;
-                                            seatselected = true;
-                                        }
-                                    } while (seatselected == false);
-                                }
+                            selectSeatsManually();
                                 break;
 
                             //Automatic seat selection
                             
                             case 2:
-                            int selectedSeats = 0;
-                            boolean completedSeatSelection = false;
-                            System.out.println("Seats will be selected automatically:");
-                            // Traverse through rows of the seats matrix in search of available seats
-                            // Traversal ends when the seat selection is complete, i.e. when as many seats have been selected as there are tickets to be purchased by the user.
-                            for(int i = 0; i < ROWS && !completedSeatSelection; i++){
-                                for(int j = 0; j < COLUMNS && !completedSeatSelection; j++){
-                                    if(seats[i][j] == AVAILABLE){
-                                        seats[i][j] = OCCUPIED;
-                                        System.out.println("The seat in row " + (i+1) + " and column " + (j+1) + " has been selected.");
-                                        // The selected and available seat counts are updated.
-                                        selectedSeats++;
-                                        availableSeats--;
-                                        
-                                        if(selectedSeats == tickets){
-                                            completedSeatSelection = true;
-                                        }
-                                    }
-                                }
-                            }
+                            selectSeatsAutomatically();
                             purchaseCompleted = true;
                             seatsAssigned = true;
                         break;
                         case 3:
-                        boolean adjacentSeats = false;
-                        // To find contiguous seats, the array must be traversed. Once found, no further traversal is necessary. 
-                        // Since this is a traversal that may end before the end of the matrix traversal (indeterminate number of iterations), 
-                        // the matrix is traversed by nesting two while loops.
-                        int i = 0;
-                        // The while condition causes the rows of the matrix to be traversed as long as contiguous entries have not been found.
-                        while (i < ROWS && !adjacentSeats) {
-                            int adjacent = 0; // adjacent seats counter
-                            int j = 0;
-                            while (j < COLUMNS && !adjacentSeats) {
-                                if (seats[i][j] == AVAILABLE) {
-                                    adjacent++;
-                                } else {
-                                    adjacent = 0; // Restart the count when an occupied seat is found
-                                }
-                                // If, after traversing the matrix, N contiguous seats have been found....
-                                if (adjacent == tickets) {
-                                    // Adjacent seats found are marked  as occupied.
-                                    for (int k = j - adjacent + 1; k <= j; k++) {
-                                        seats[i][k] = OCCUPIED;
-                                        // Update available seats
-                                        availableSeats--;
-                                        System.out.println("The seat in row " + (i+1) + " and column " + (k+1) + " has been selected.");
-                                    }
-                                    adjacentSeats = true;
-                                    purchaseCompleted = true;
-                                    seatsAssigned = true;
-                                }
-                                j++;
-                            }
-                            i++;
-                        }
-                        if(!adjacentSeats){
-                            System.out.println("There are not enough adjacent seats available. Choose another type of seat selection");
-                            purchaseCompleted = false;
-                        }
+                        searchContiguousSeats();
                         break;
                         case 4: 
                         System.out.println("You exited the purchase menu.");
@@ -242,31 +301,7 @@ public class assignment6 {
                     }
                 }
                 while(purchaseCompleted == false);
-                 // Generation of the invoice for the purchase of tickets if the seats were assigned
-                 if(seatsAssigned==true){ 
-                    double totalPrice = price * tickets;
-                    int ticketsAdults = tickets - minorTickets;
-                    double totalPriceMinors, totalPriceAdults;
-                    if (minorTickets> 0) {
-                        totalPriceMinors = price * (1 - DISCOUNT_MINORS/100)  * minorTickets;//divided into 100 to convert it into a percentange, and substract 1 to apply the discount(it is equal to multiply by 0,8)
-                        totalPriceAdults = price * ticketsAdults;
-                        totalPrice = totalPriceAdults + totalPriceMinors;
-                    }
-                    else {
-                        totalPrice = price * tickets;
-                    }
-                    if (tickets > MAX_TICKETS_NUMBER) {
-                        totalPrice = totalPrice * (1 - DISCOUNT_MAXTICKETS/100);//(equivalent to multiply by 0,9)
-                    }
-                    System.out.println("Invoice:");
-                    System.out.println("  Number of tickets: " + tickets);
-                    System.out.println("  Price per ticket: " + price);
-                    System.out.println("  Discount applied for purchase in bulk: " + (tickets > MAX_TICKETS_NUMBER ? DISCOUNT_MAXTICKETS + "%": "None"));
-                    System.out.println("  Discount applied for tickets for minors: " + (minorTickets > 0 ? DISCOUNT_MINORS + "%" : "None"));
-                    System.out.printf("  Total price: %.2f", totalPrice);
-                }
-        }else{
-            System.out.println("Sorry, there are not enough seats available. Purchase could not be finished.");
+         showInvoice();        
         }
         break;
                     
