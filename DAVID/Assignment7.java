@@ -20,6 +20,7 @@ public class Assignment7 {
     private static int totalTickets;
     private static boolean purchaseCompleted , seatsAssigned;
     private static double price;
+    private static char availability;
     public static void main(String[] args) {
         menu();
         KEYBOARD.close();
@@ -88,62 +89,72 @@ public class Assignment7 {
         return (number);
 
     }
-     //Method that selects the seats
-    //  public static selectSeats(){
+     //Method that tell us if the seat is available or not
+     public static int [] selectSeats(char status){
+        int row, column;
+        //Loop until the seat is found
+        do{
+        row = verifyrange(1, ROWS, "Enter the row number of the seat: ");
+        column = verifyrange(1, COLUMNS, "Enter the column number of the seat: ");
+        availability = seats[row - 1][column - 1];
+        if (availability != status){
+            System.out.println("ERROR. The seat is not available. Choose another seat.");
+        }
+        //Verify if the seat is available or not
+    }
+    while (availability != status);
+int [] seatPosition = {row, column};
+return seatPosition;
 
 
-
-    //  }
+      }
     //Method to select seats manually
     public static void selectSeatsManually(){
         for (int i = 0; i < totalTickets; i++) {
             System.out.println("Ticket number " + (i + 1));
-            int row, column;
             boolean seatselected = false;
+            
+            // Select the seat manually
             do {
-                // Ask for the row of the seat
-                row = verifyrange(1, ROWS, "Enter the row number of the seat you want to buy: ");
-                System.out.println("The row number of the seat is: " + row);
-                // Ask for the column of the seat
-                System.out.println("Ticket number " + (i + 1));
-                column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to buy: ");
-                System.out.println("The column number of the seat is: " + column);
-                if (seats[row - 1][column - 1] == OCCUPIED) {
-                    System.out.println("ERROR. The seat is already occupied.");
-                } else {
-                    // Mark the seat as occupied
-                    seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
-                    availableSeats--;
-                    seatselected = true;
-                }
-            } while (seatselected == false);
+                //We use the method selectSeats to verify if the seat is available(status==available) and to select the seat desired
+                int[] seatPosition = selectSeats(AVAILABLE);
+                int row = seatPosition[0];// We save the position of the row & column  found in the method selectSeats
+                int column = seatPosition[1];
+                
+            // The seat is marked as occupied
+            seats[row - 1][column - 1] = OCCUPIED;
+            availableSeats--;
+            seatselected = true;
+            System.out.println("The seat at row " + row + " and column " + column + " has been selected.");
+            } while (!seatselected);
         }
-
+        purchaseCompleted = true;
 
     }
     //Method to select seats automatically
 public static void selectSeatsAutomatically(){
     int selectedSeats = 0;
-                            boolean completedSeatSelection = false;
-                            System.out.println("Seats will be selected automatically:");
-                            // Traverse through rows of the seats matrix in search of available seats
-                            // Traversal ends when the seat selection is complete, i.e. when as many seats have been selected as there are tickets to be purchased by the user.
-                            for(int i = 0; i < ROWS && !completedSeatSelection; i++){
-                                for(int j = 0; j < COLUMNS && !completedSeatSelection; j++){
-                                    if(seats[i][j] == AVAILABLE){
-                                        seats[i][j] = OCCUPIED;
-                                        System.out.println("The seat in row " + (i+1) + " and column " + (j+1) + " has been selected.");
-                                        // The selected and available seat counts are updated.
-                                        selectedSeats++;
-                                        availableSeats--;
-                                        
-                                        if(selectedSeats == tickets){
-                                            completedSeatSelection = true;
-                                        }
-                                    }
-                                }
-                            }
-
+    boolean completedSeatSelection = false;
+    System.out.println("Seats will be selected automatically:");
+    // Traverse through rows of the seats matrix in search of available seats
+    // Traversal ends when the seat selection is complete, i.e. when as many seats have been selected as there are tickets to be purchased by the user.
+    for(int i = 0; i < ROWS && !completedSeatSelection; i++){
+        for(int j = 0; j < COLUMNS && !completedSeatSelection; j++){
+            if(seats[i][j] == AVAILABLE){
+                seats[i][j] = OCCUPIED;
+                System.out.println("The seat in row " + (i+1) + " and column " + (j+1) + " has been selected.");
+                // The selected and available seat counts are updated.
+                selectedSeats++;
+                availableSeats--;
+                
+                if(selectedSeats == tickets){
+                    completedSeatSelection = true;
+                }
+            }
+        }
+    }
+    purchaseCompleted = true;
+    seatsAssigned = true;                    
 
 
 }
@@ -281,6 +292,8 @@ public static void searchContiguousSeats(){
                             //Manual seat selection
                             case 1:
                             selectSeatsManually();
+                            purchaseCompleted = true;
+                            seatsAssigned = true;
                                 break;
 
                             //Automatic seat selection
@@ -292,6 +305,7 @@ public static void searchContiguousSeats(){
                         break;
                         case 3:
                         searchContiguousSeats();
+
                         break;
                         case 4: 
                         System.out.println("You exited the purchase menu.");
@@ -393,51 +407,35 @@ public static void searchContiguousSeats(){
     public static void changeTickets(int changedTickets) {
         for (int i = 0; i < changedTickets; i++) {
             System.out.println("Ticket number " + (i + 1));
-            int row, column;
             boolean seatselected = false;
             boolean changeCompleted = false;
             seatsAvailability();
-            // Change the ticket
             do {
-
-                // Ask for the row of the seat
-                row = verifyrange(1, ROWS, "Enter the row number of the seat you want to change: ");
-   
-
-                // Ask for the column of the seat
-                
-                column = verifyrange(1, COLUMNS, "Enter the column number of the seat you want to change: ");
-               
-                
-                if (seats[row - 1][column - 1] == OCCUPIED) {
-                    System.out.println("Correct position, you selected, to change, the seat:" + " row: "+ row + " column: " + column);
-                    // Mark the seat as available
-                    seats[row - 1][column - 1] = 'A'; // We put 'A' to indicate is Available
-                    availableSeats++;
-                    seatselected = true;
-                   
-                    //Select a new empty seat
-                    do {
-                    row = verifyrange(1, ROWS, "Enter the row number of the new seat: ");
-                    column = verifyrange(1, COLUMNS, "Enter the column number of the new seat: ");
-                    if (seats[row - 1][column - 1] == AVAILABLE) {
-                        System.out.println("Correct position, your new seat is: " + " row: "+ row + " column: " + column);
-                        // Mark the seat as occupied
-                        seats[row - 1][column - 1] = 'O'; // We put 'O' to indicate is Occupied
+                //We look for the seat to change, we verify with the method if it is occupied
+                System.out.println("Select the seat to change");
+                int[] PreviousSeatPosition = selectSeats(OCCUPIED);
+                int PreviousRow = PreviousSeatPosition[0];// We save the position of the row & column  found in the method selectSeats
+                int PreviousColumn = PreviousSeatPosition[1];
+                System.out.println("Correct position, you selected, to change, the seat: row " + PreviousRow + " column " + PreviousColumn);
+                seats[PreviousRow - 1][PreviousColumn - 1] = AVAILABLE;//Now that is free we change the seat to available
+                availableSeats++;
+                seatselected = true;
+                do {
+                    //Now we look for the new seat to change that must be available
+                    System.out.println("Select the new seat"); 
+                    int[] newSeatPosition = selectSeats(AVAILABLE);
+                    int newRow = newSeatPosition[0];
+                    int newColumn = newSeatPosition[1];
+                    if (seats[newRow - 1][newColumn - 1] == AVAILABLE) {
+                        System.out.println("Correct position, your new seat is: row " + newRow + " column " + newColumn);
+                        seats[newRow - 1][newColumn - 1] = OCCUPIED;
                         availableSeats--;
                         changeCompleted = true;
                     } else {
-                        System.out.println("ERROR. The seat is already occupied,try with another seat.");
+                        System.out.println("ERROR. The seat is already occupied, try with another seat.");
                     }
-                } while (changeCompleted == false);
-                }
-                 else {
-                    // The seat was not occupied, so it cannot be changed.
-                    System.out.println("ERROR. The seat is already available.");
-                }
-            }
-
-            while (seatselected == false);
+                } while (!changeCompleted);
+            } while (!seatselected);
         }
     }
 }
